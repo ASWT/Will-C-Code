@@ -1,0 +1,123 @@
+/*------------------------------------------------------------------
+File: FreeFallingParachutist.c
+Author:Chang Hung (Will) Wu, Orion Samuel
+Description: Calculates the velocity of the parachutist after a given time.
+---------------------------------------------------------------------*/
+#include <stdio.h>
+#include <math.h>
+#define G 9.8
+#define N 50
+#define NUM_ROWS 2
+#define Time_V 0
+#define Velo_V 1
+#define TRUE 1
+#define FALSE 0
+// function prototypes
+//Structure for user input
+typedef struct
+{
+    double m; //weight of the parachutist
+    double c; //drag coefficient
+    double tf; //time after the parachutist jumped (final time)
+}USER_INPUT;
+
+typedef struct
+{
+    double t; //time passed
+    double v; //velocity of the parachutist
+}OUTPUT_DATA;
+void getInput(USER_INPUT *);
+void calculateVelocity(USER_INPUT *, int n, double [][n]);
+void displayTable(USER_INPUT *, OUTPUT_DATA *, int n, double [][n]);
+/*-------------------------------------------------------------
+Function: main
+Description:  This function controls the overall program.
+              It makes three calls, one to get user input, one
+              to compute time/velocity data points, and a third
+              to display the calculated values in a table.
+-------------------------------------------------------------*/
+void main()
+{
+    // Variable declarations
+    USER_INPUT input;
+    OUTPUT_DATA output;
+    double points[NUM_ROWS][N]; // N points for time/velocity
+    // Get input from user, a weight, drag coefficient, and time
+    getInput(&input);
+    // calculate the velocity of the parachutist
+    calculateVelocity(&input, N, points);
+    // displat output to the console
+    displayTable(&input, &output, N, points);
+}
+/*---------------------------------------------------------------------------
+Function:  getInput
+Parameters
+   inP  - pointer to a USER_INPUT structure variable
+Description: Obtains from the user, the weight, drag and final time
+             values and stores in the referenced data structure.
+             All values must be greater than zero.
+--------------------------------------------------------------------------*/
+void getInput(USER_INPUT *inP)
+{
+    int contr;
+    //get data from user
+    do
+    {
+         contr = TRUE;
+         printf("Please enter the weight of the parachutist in kg, drag coefficient in kg/s, and the time in second: ");
+         scanf("%lf %lf %lf", &inP->m, &inP->c, &inP->tf);
+          if (inP->m<=0.0 || inP->c<=0.0 || inP->tf<=0.0)
+          {
+              printf("The values must be greater or equal to zero!\n");
+              contr = FALSE;
+          }
+    } while(contr == FALSE);
+}
+/*---------------------------------------------------------------------------
+Function:  computeVelocity
+Parameters
+   inP  - pointer to a USRE_INPUT structure variable
+Description: Using the weight, drag and final time values in the referenced
+             structure, computes and stores N+1 points in the two arrays
+             found in the referenced structure variable.
+--------------------------------------------------------------------------*/
+void calculateVelocity(USER_INPUT *inP, int n, double p[][n])
+{
+    // Variable declarations
+    double t;
+    double inc; //increment of time
+    int c; //loop counter and column index in the 2D array
+    double v; //for calculating the velocity
+    inc = inP->tf/n;
+    t = 0.0;
+    // Calculations
+    for (c=0; c<=n; c++)
+    {
+        p[Time_V][c]=t;
+        v = 1 - exp((-((*inP).c/(*inP).m))*t);
+        v = G*(*inP).m*v;
+        p[Velo_V][c] = v/(*inP).c;
+        // increment variables for next point
+        t = t + inc;
+    }
+}
+/*---------------------------------------------------------------------------
+Function:  displayTable
+Parameters
+   inP  - pointer to a USER_INPUT structure variable
+   ouP  - pointer to a OUTPUT_DATA structure variable
+Description: Displays a table of the calculated data points.
+--------------------------------------------------------------------------*/
+void displayTable(USER_INPUT *inP, OUTPUT_DATA *ouP, int n, double p[][n])
+{
+    int v;   //for indexing the columns in the 2D array
+    //setup the start of the table
+    printf("Velocity for the parachutist with the weight %.1f kg and a drag coefficient %.1f kg/s are\n", inP->m, inP->c);
+    printf("\t Time (s) \tVelocity (m/s)\n");
+    printf("------------------------------------------------------------------------------------------------------------------\n");
+    for(v=0; v<=n; v++)
+    {   // Display results
+        printf("\t %.2f \t\t %.2f\n", p[Time_V][v], p[Velo_V][v]);
+    }
+    printf("[2][0]=%f", p[Velo_V][0]);
+}
